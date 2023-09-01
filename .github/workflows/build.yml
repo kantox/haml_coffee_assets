@@ -1,0 +1,97 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will download a prebuilt Ruby version, install dependencies and run tests with Rake
+# For more information see: https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
+
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: 'Ruby: ${{ matrix.ruby-version }} - Rails: ${{ matrix.rails_ver }}'
+    runs-on: ubuntu-20.04
+    continue-on-error: ${{ matrix.allow-failure }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version: ['2.5']
+        allow-failure: [false]
+        frozen-string: [true]
+        rails_ver: ['5.2']
+        sprockets: [3]
+        push-gem: [true]
+        include:
+          - ruby-version: '2.6'
+            allow-failure: true
+            frozen-string: true
+            rails_ver: '6.0'
+            sprockets: '4'
+            push-gem: false
+          - ruby-version: '2.5'
+            allow-failure: false
+            frozen-string: true
+            rails_ver: '5.1'
+            sprockets: '3'
+            push-gem: false
+          - ruby-version: '2.4'
+            allow-failure: false
+            frozen-string: true
+            rails_ver: '5.0'
+            sprockets: '3'
+            push-gem: false
+          - ruby-version: '2.2'
+            allow-failure: false
+            frozen-string: true
+            rails_ver: '4.2'
+            sprockets: '3'
+            push-gem: false
+          - ruby-version: '2.2'
+            allow-failure: false
+            frozen-string: true
+            rails_ver: '4.0'
+            sprockets: '3'
+            push-gem: false
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+        env:
+          RAILS_VER: ${{ matrix.rails_ver }}
+          SPROCKETS_VER: ${{ matrix.sprockets }}
+      - run: rake
+        env:
+          RAILS_VER: ${{ matrix.rails_ver }}
+          SPROCKETS_VER: ${{ matrix.sprockets }}
+      # another option is to search for something like [PUSH_BETA_GEM] in event.payload.commits[0].message
+      - name: Publish Beta to GitHub Packages
+        if: ${{ github.event.ref != 'refs/heads/master' && ! contains(github.event.ref, 'refs/tags') && matrix.push-gem }}
+        run: |
+          set +x
+          mkdir -p $HOME/.gem
+          cat << EOF > ~/.gem/credentials
+          ---
+          :github: Bearer ${GITHUB_TOKEN}
+          EOF
+          chmod 0600 $HOME/.gem/credentials
+          set -x
+
+          git config --global --add safe.directory "$(pwd)"
+
+          gem build $GEMSPEC | tee build.log
+          export GEM_VERSION=$(grep Version build.log | cut -d ':' -f 2 | xargs)
+          if [[ $GEM_VERSION =~ beta[0-9]*$ ]]; then
+            echo 'publish beta version'
+            gem push --key github --host https://rubygems.pkg.github.com/${OWNER} *.gem
+          else
+            echo 'Only beta versions are allowed'
+            exit 1
+          fi
+        env:
+          GEMSPEC: ${{github.event.repository.name}}.gemspec
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          OWNER: ${{github.event.repository.owner.login}}
