@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = '>= 1.3.6'
   s.rubyforge_project         = 'haml_coffee_assets'
 
-  s.files = Dir.glob('{app,lib,vendor}/**/*') + %w[LICENSE README.md]
+  s.files = Dir.glob('{app,lib}/**/*') + Dir.glob('vendor/assets/**/*') +%w[LICENSE README.md]
 
   s.add_runtime_dependency 'coffee-script', '>= 2'
   s.add_runtime_dependency 'sprockets', '>= 2'
