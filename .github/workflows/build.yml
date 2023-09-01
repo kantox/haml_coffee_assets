@@ -63,7 +63,7 @@ jobs:
         env:
           RAILS_VER: ${{ matrix.rails_ver }}
           SPROCKETS_VER: ${{ matrix.sprockets }}
-      - run: rake
+      - run: bundle exec rake
         env:
           RAILS_VER: ${{ matrix.rails_ver }}
           SPROCKETS_VER: ${{ matrix.sprockets }}
