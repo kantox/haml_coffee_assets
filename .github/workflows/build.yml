@@ -12,13 +12,6 @@ jobs:
         ruby: [ruby-3.4, ruby-3.3, ruby-3.2, ruby-3.1, ruby-3.0] # ruby/setup-ruby will use latest patch version
         sprockets: ['4', '3']
         include:
-          # Rails 6.0 on Ruby 2.7
-          - rails: '6.0'
-            ruby: ruby-2.7
-            sprockets: '4'
-          - rails: '6.0'
-            ruby: ruby-2.7
-            sprockets: '3'
           # Rails 5.2 on Ruby 2.6
           - rails: '5.2'
             ruby: ruby-2.6
@@ -27,13 +20,11 @@ jobs:
             ruby: ruby-2.6
             sprockets: '3'
         exclude:
-          # Rails 8.0/8.1 doesn't support Ruby 3.0/3.1 and JRuby 9.4
+          # Rails 8.0/8.1 doesn't support Ruby 3.0/3.1
           - rails: '8.1'
             ruby: ruby-3.1
           - rails: '8.1'
             ruby: ruby-3.0
-          - rails: '8.1'
-            ruby: jruby-9.4
           - rails: '8.0'
             ruby: ruby-3.1
           - rails: '8.0'
