@@ -64,3 +64,31 @@ jobs:
         bundler-cache: true
     - run: npm install phantomjs-prebuilt@2.1.16 && echo $PWD/node_modules/phantomjs-prebuilt/bin >> $GITHUB_PATH
     - run: OPENSSL_CONF=/dev/null bundle exec rake
+      # another option is to search for something like [PUSH_BETA_GEM] in event.payload.commits[0].message
+    - name: Publish Beta to GitHub Packages
+      if: ${{ github.event.ref != 'refs/heads/master' && ! contains(github.event.ref, 'refs/tags') && matrix.push-gem }}
+      run: |
+        set +x
+        mkdir -p $HOME/.gem
+        cat << EOF > ~/.gem/credentials
+        ---
+        :github: Bearer ${GITHUB_TOKEN}
+        EOF
+        chmod 0600 $HOME/.gem/credentials
+        set -x
+
+        git config --global --add safe.directory "$(pwd)"
+
+        gem build $GEMSPEC | tee build.log
+        export GEM_VERSION=$(grep Version build.log | cut -d ':' -f 2 | xargs)
+        if [[ $GEM_VERSION =~ beta[0-9]*$ ]]; then
+          echo 'publish beta version'
+          gem push --key github --host https://rubygems.pkg.github.com/${OWNER} *.gem
+        else
+          echo 'Only beta versions are allowed'
+          exit 1
+        fi
+      env:
+        GEMSPEC: ${{github.event.repository.name}}.gemspec
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        OWNER: ${{github.event.repository.owner.login}}
