@@ -47,9 +47,7 @@ module HamlCoffeeAssets
 
             env.register_mime_type 'text/jst+hamlc+ruby', extensions: ['.jst.hamlc.erb']
             env.register_transformer 'text/jst+hamlc+ruby', 'text/jst+hamlc', ::Sprockets::ERBProcessor
-          end
-
-          if env.respond_to?(:register_engine)
+          elsif env.respond_to?(:register_engine)
             args = ['.hamlc', ::HamlCoffeeAssets::Transformer]
             args << { mime_type: 'text/hamlc', silence_deprecation: true } if Sprockets::VERSION.start_with?('3')
             env.register_engine(*args)
