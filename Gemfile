@@ -9,3 +9,6 @@ gem "rack", "~> 2" # Rack 3 is not compatible with Jasmine and fails -- jasmine-
 gem "json", "< 3"
 gem "rails", "~> #{ENV['RAILS_VER'] || raise("missing rails version")}.0"
 gem "sprockets", "~> #{ENV['SPROCKETS_VER'] || raise("missing sprockets version")}"
+# ostruct dropped from Ruby 4.0's default gems; jasmine requires it without
+# declaring the dependency itself.
+gem "ostruct"
