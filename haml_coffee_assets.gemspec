@@ -14,7 +14,10 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.5.8'
   s.required_rubygems_version = '>= 2.5.2'
 
-  s.files = Dir.glob('{app,lib,vendor}/**/*') + %w[LICENSE README.md]
+  # Only vendor/assets ships in the gem — NOT the rest of vendor/, which is
+  # where `bundler-cache: true` in CI drops the full dev/test dependency
+  # closure (vendor/bundle) right before `gem build` runs.
+  s.files = Dir.glob('{app,lib}/**/*') + Dir.glob('vendor/assets/**/*') + %w[LICENSE README.md]
 
   s.add_runtime_dependency 'coffee-script', '>= 2'
   s.add_runtime_dependency 'railties', '>= 5.2', "< 8.2"
