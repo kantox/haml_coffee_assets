@@ -1,6 +1,6 @@
 name: build
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   test:
@@ -8,17 +8,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rails: ['8.1', '8.0', '7.2', '7.1', '7.0', '6.1']                               # we add ".0" in the Gemfile so latest patch version used
-        ruby: [ruby-3.4, ruby-3.3, ruby-3.2, ruby-3.1, ruby-3.0] # ruby/setup-ruby will use latest patch version
-        sprockets: ['4', '3']
-        include:
-          # Rails 5.2 on Ruby 2.6
-          - rails: '5.2'
-            ruby: ruby-2.6
-            sprockets: '4'
-          - rails: '5.2'
-            ruby: ruby-2.6
-            sprockets: '3'
+        rails: ['8.1', '8.0', '7.2', '7.1']                               # we add ".0" in the Gemfile so latest patch version used
+        ruby: [ruby-4.0, ruby-3.4, ruby-3.3, ruby-3.2, ruby-3.1, ruby-3.0] # ruby/setup-ruby will use latest patch version
+        sprockets: ['4']
         exclude:
           # Rails 8.0/8.1 doesn't support Ruby 3.0/3.1
           - rails: '8.1'
@@ -48,7 +40,7 @@ jobs:
     - run: OPENSSL_CONF=/dev/null bundle exec rake
       # another option is to search for something like [PUSH_BETA_GEM] in event.payload.commits[0].message
     - name: Publish Beta to GitHub Packages
-      if: ${{ github.event.ref != 'refs/heads/master' && ! contains(github.event.ref, 'refs/tags') && matrix.rails == '6.1' && matrix.ruby == 'ruby-3.0' && matrix.sprockets == '4' }}
+      if: ${{ github.event.ref != 'refs/heads/master' && ! contains(github.event.ref, 'refs/tags') && matrix.rails == '7.1' && matrix.ruby == 'ruby-3.0' && matrix.sprockets == '4' }}
       run: |
         set +x
         mkdir -p $HOME/.gem
